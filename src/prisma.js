@@ -8,12 +8,18 @@ const prisma = new Prisma({
 const logData = (data) => console.log(JSON.stringify(data, undefined, 2));
 const logErr = (err) => console.log(err);
 
-prisma.query
-  .users(null, '{ id name posts { title } }')
-  .then(logData)
-  .catch(logErr);
-
-prisma.query
-  .comments(null, '{ id text author { id name } }')
+prisma.mutation
+  .updatePost({
+    where: {
+      id: 'ckfa9l9hg00610884tcw41fd8'
+    },
+    data: {
+      body: 'why wont anyone ask me out!!! im so lonely!!!',
+      published: true
+    }
+  })
+  .then(() =>
+    prisma.query.posts(null, '{ id title body published author { name } }')
+  )
   .then(logData)
   .catch(logErr);
