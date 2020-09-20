@@ -4,25 +4,25 @@ import { v4 as uuid } from 'uuid';
 // You should do it though if you want more control over what your error messages say!
 
 const Mutation = {
-  async createUser(parent, { data }, { prisma }, info) {
+  createUser(parent, { data }, { prisma }, info) {
     return prisma.mutation.createUser(data, info);
   },
-  async updateUser(parent, { id, data }, { prisma }, info) {
+  updateUser(parent, { id, data }, { prisma }, info) {
     return prisma.mutation.updateUser({ where: { id }, data }, info);
   },
-  async deleteUser(parent, { id }, { prisma }, info) {
+  deleteUser(parent, { id }, { prisma }, info) {
     return prisma.mutation.deleteUser({ where: { id } }, info);
   },
-  async createPost(parent, { data }, { prisma }, info) {
+  createPost(parent, { data }, { prisma }, info) {
     return prisma.mutation.createPost(
       { data: { ...data, author: { connect: { id: data.author } } } },
       info
     );
   },
-  async updatePost(parent, { id, data }, { prisma }, info) {
+  updatePost(parent, { id, data }, { prisma }, info) {
     return prisma.mutation.updatePost({ where: { id }, data }, info);
   },
-  async deletePost(parent, { id }, { prisma }, info) {
+  deletePost(parent, { id }, { prisma }, info) {
     return prisma.mutation.deletePost({ where: { id } }, info);
   },
   createComment(parent, { data }, { prisma }, info) {
