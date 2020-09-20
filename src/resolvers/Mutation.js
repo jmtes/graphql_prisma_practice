@@ -1,39 +1,16 @@
 import { v4 as uuid } from 'uuid';
 
+// It's largely unnecessary to make your own checks for things such as whether or not a resource actually exists because Prisma can do it for you.
+// You should do it though if you want more control over what your error messages say!
+
 const Mutation = {
   async createUser(parent, { data }, { prisma }, info) {
-    const emailTaken = await prisma.exists.User({ email: data.email });
-
-    if (emailTaken) throw Error('Email already in use');
-
     return prisma.mutation.createUser(data, info);
   },
-  updateUser(parent, { id, data }, { db }, info) {
-    const { users } = db;
-
-    // Check if user exists
-    const user = users.find((user) => user.id === id);
-    if (!user) throw new Error('User does not exist.');
-
-    if (data.email) {
-      const emailTaken = users.some((user) => user.email === data.email);
-
-      if (emailTaken) throw new Error('Provided email is already in use.');
-
-      user.email = data.email;
-    }
-
-    if (data.name) user.name = data.name;
-
-    if (data.age !== undefined) user.age = data.age;
-
-    return user;
+  async updateUser(parent, { id, data }, { prisma }, info) {
+    return prisma.mutation.updateUser({ where: { id }, data }, info);
   },
   async deleteUser(parent, { id }, { prisma }, info) {
-    const userExists = await prisma.exists.User({ id });
-
-    if (!userExists) throw Error('User does not exist.');
-
     return prisma.mutation.deleteUser({ where: { id } }, info);
   },
   createPost(parent, { data }, { db, pubsub }, info) {
