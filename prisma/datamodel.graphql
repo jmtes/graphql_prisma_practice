@@ -1,9 +1,16 @@
+# What CASCADE means is that, in a one-to-many relationship, if the one gets deleted then the many get deleted as well.
+# What SET_NULL means is that, in a one-to-many relationship, if one of the many get deleted, it is simply set to NULL in the one's mapping to the many.
+# Since we're saying nothing can be null in the arrays below, that would result in simply removing the entry.
+
+# Example: In line 21, we're saying that if a post gets deleted, it should simply be set to NULL in the User's record.
+# In line 22, we're saying that if a post gets deleted, all the comments associated with it should be deleted as well.
+
 type User {
   id: ID! @unique
   name: String!
   email: String! @unique
-  posts: [Post!]!
-  comments: [Comment!]!
+  posts: [Post!]! @relation(name: "PostToUser", onDelete: CASCADE)
+  comments: [Comment!]! @relation(name: "CommentToUser", onDelete: CASCADE)
 }
 
 type Post {
@@ -11,13 +18,13 @@ type Post {
   title: String!
   body: String!
   published: Boolean!
-  author: User!
-  comments: [Comment!]!
+  author: User! @relation(name: "PostToUser", onDelete: SET_NULL)
+  comments: [Comment!]! @relation(name: "CommentToPost", onDelete: CASCADE)
 }
 
 type Comment {
   id: ID! @unique
   text: String!
-  author: User!
-  post: Post!
+  author: User! @relation(name: "CommentToUser", onDelete: SET_NULL)
+  post: Post! @relation(name: "CommentToPost", onDelete: SET_NULL)
 }
