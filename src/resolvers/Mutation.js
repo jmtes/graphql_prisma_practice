@@ -19,104 +19,29 @@ const Mutation = {
       info
     );
   },
-  updatePost(parent, { id, data }, { db, pubsub }, info) {
-    const { posts } = db;
-
-    // Check if post exists
-    const post = posts.find((post) => post.id === id);
-    if (!post) throw new Error('Post does not exist.');
-
-    const originalPost = { ...post };
-
-    if (data.title !== undefined) post.title = data.title;
-    if (data.body !== undefined) post.body = data.body;
-
-    if (data.published !== undefined) {
-      post.published = data.published;
-
-      // Post has always been public
-      if (originalPost.published && post.published)
-        pubsub.publish('post', { post: { mutation: 'UPDATED', data: post } });
-      // Post has been made public
-      else if (!originalPost.published && post.published)
-        pubsub.publish('post', { post: { mutation: 'CREATED', data: post } });
-      // Post has been made not public
-      else if (originalPost.published && !post.published)
-        pubsub.publish('post', {
-          post: { mutation: 'DELETED', data: originalPost }
-        });
-    } else if (post.published)
-      pubsub.publish('post', { post: { mutation: 'UPDATED', data: post } });
-
-    return post;
+  async updatePost(parent, { id, data }, { prisma }, info) {
+    return prisma.mutation.updatePost({ where: { id }, data }, info);
   },
-  deletePost(parent, args, { db, pubsub }, info) {
-    const { id } = args;
-    const { posts } = db;
-    let { comments } = db;
-
-    const postIndex = posts.findIndex((post) => post.id === id);
-    if (postIndex < 0) throw new Error('Post does not exist.');
-
-    const [deletedPost] = posts.splice(postIndex, 1);
-
-    comments = comments.filter((comment) => comment.post !== id);
-
-    if (deletedPost.published)
-      pubsub.publish('post', {
-        post: { mutation: 'DELETED', data: deletedPost }
-      });
-
-    return deletedPost;
+  async deletePost(parent, { id }, { prisma }, info) {
+    return prisma.mutation.deletePost({ where: { id } }, info);
   },
-  createComment(parent, { data }, { db, pubsub }, info) {
-    const { users, posts, comments } = db;
-
-    const userExists = users.some((user) => user.id === data.author);
-    if (!userExists) throw new Error('User does not exist.');
-
-    const postExists = posts.some(
-      (post) => post.id === data.post && post.published
+  createComment(parent, { data }, { prisma }, info) {
+    return prisma.mutation.createComment(
+      {
+        data: {
+          ...data,
+          author: { connect: { id: data.author } },
+          post: { connect: { id: data.post } }
+        }
+      },
+      info
     );
-    if (!postExists) throw new Error('Post does not exist.');
-
-    const newComment = { id: uuid(), ...data };
-    comments.push(newComment);
-    pubsub.publish(`comment ${data.post}`, {
-      comment: { mutation: 'CREATED', data: newComment }
-    });
-
-    return newComment;
   },
-  updateComment(parent, { id, data }, { db, pubsub }, info) {
-    const { comments } = db;
-
-    // Check if comment exists
-    const comment = comments.find((comment) => comment.id === id);
-    if (!comment) throw new Error('Comment does not exist.');
-
-    if (data.text) comment.text = data.text;
-
-    pubsub.publish(`comment ${comment.post}`, {
-      comment: { mutation: 'UPDATED', data: comment }
-    });
-
-    return comment;
+  updateComment(parent, { id, data }, { prisma }, info) {
+    return prisma.mutation.updateComment({ where: { id }, data }, info);
   },
-  deleteComment(parent, args, { db, pubsub }, info) {
-    const { id } = args;
-    const { comments } = db;
-
-    const commentIndex = comments.findIndex((comment) => comment.id === id);
-    if (commentIndex < 0) throw new Error('Comment does not exist.');
-
-    const [deletedComment] = comments.splice(commentIndex, 1);
-
-    pubsub.publish(`comment ${deletedComment.post}`, {
-      comment: { mutation: 'DELETED', data: deletedComment }
-    });
-
-    return deletedComment;
+  deleteComment(parent, { id }, { prisma }, info) {
+    return prisma.mutation.deleteComment({ where: { id } }, info);
   }
 };
 
