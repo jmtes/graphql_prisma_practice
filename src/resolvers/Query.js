@@ -1,17 +1,19 @@
 const Query = {
-  users(parent, args, { db }, info) {
-    const { users } = db;
-    const query = new RegExp(args.query, 'gi');
+  users(parent, args, { prisma }, info) {
+    // const { users } = db;
+    // const query = new RegExp(args.query, 'gi');
 
-    return users.filter((user) => user.name.match(query));
+    // return users.filter((user) => user.name.match(query));
+    return prisma.query.users(null, info);
   },
-  posts(parent, args, { db }, info) {
-    const { posts } = db;
-    const query = new RegExp(args.query, 'gi');
+  posts(parent, args, { prisma }, info) {
+    // const { posts } = db;
+    // const query = new RegExp(args.query, 'gi');
 
-    return posts.filter(
-      (post) => post.title.match(query) || post.body.match(query)
-    );
+    // return posts.filter(
+    //   (post) => post.title.match(query) || post.body.match(query)
+    // );
+    return prisma.query.posts(null, info);
   },
   comments(parent, args, { db }, info) {
     const { comments } = db;
