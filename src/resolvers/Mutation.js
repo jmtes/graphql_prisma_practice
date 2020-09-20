@@ -13,18 +13,11 @@ const Mutation = {
   async deleteUser(parent, { id }, { prisma }, info) {
     return prisma.mutation.deleteUser({ where: { id } }, info);
   },
-  createPost(parent, { data }, { db, pubsub }, info) {
-    const { users, posts } = db;
-
-    const userExists = users.some((user) => user.id === data.author);
-    if (!userExists) throw new Error('User does not exist.');
-
-    const newPost = { id: uuid(), ...data };
-    posts.push(newPost);
-    if (newPost.published)
-      pubsub.publish('post', { post: { mutation: 'CREATED', data: newPost } });
-
-    return newPost;
+  async createPost(parent, { data }, { prisma }, info) {
+    return prisma.mutation.createPost(
+      { data: { ...data, author: { connect: { id: data.author } } } },
+      info
+    );
   },
   updatePost(parent, { id, data }, { db, pubsub }, info) {
     const { posts } = db;
