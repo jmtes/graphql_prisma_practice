@@ -59,10 +59,20 @@ const Mutation = {
       info
     );
   },
-  updatePost(parent, { id, data }, { prisma }, info) {
+  async updatePost(parent, { id, data }, { req, prisma }, info) {
+    const userId = getUserId(req);
+
+    const postExists = await prisma.exists.Post({ id, author: { id: userId } });
+    if (!postExists) throw Error('Unable to edit post.');
+
     return prisma.mutation.updatePost({ where: { id }, data }, info);
   },
-  deletePost(parent, { id }, { prisma }, info) {
+  async deletePost(parent, { id }, { req, prisma }, info) {
+    const userId = getUserId(req);
+
+    const postExists = await prisma.exists.Post({ id, author: { id: userId } });
+    if (!postExists) throw Error('Unable to delete post.');
+
     return prisma.mutation.deletePost({ where: { id } }, info);
   },
   createComment(parent, { data }, { prisma }, info) {
