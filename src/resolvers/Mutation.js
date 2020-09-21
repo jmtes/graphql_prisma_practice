@@ -1,11 +1,20 @@
-import { v4 as uuid } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 // It's largely unnecessary to make your own checks for things such as whether or not a resource actually exists because Prisma can do it for you.
 // You should do it though if you want more control over what your error messages say!
 
 const Mutation = {
-  createUser(parent, { data }, { prisma }, info) {
-    return prisma.mutation.createUser(data, info);
+  async createUser(parent, { data }, { prisma }, info) {
+    if (data.password.length < 8)
+      throw Error('Password must contain at least 8 characters.');
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(data.password, salt);
+
+    return prisma.mutation.createUser(
+      { data: { ...data, password: hashedPassword } },
+      info
+    );
   },
   updateUser(parent, { id, data }, { prisma }, info) {
     return prisma.mutation.updateUser({ where: { id }, data }, info);
