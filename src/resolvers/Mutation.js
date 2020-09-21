@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // It's largely unnecessary to make your own checks for things such as whether or not a resource actually exists because Prisma can do it for you.
 // You should do it though if you want more control over what your error messages say!
@@ -11,10 +12,17 @@ const Mutation = {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(data.password, salt);
 
-    return prisma.mutation.createUser(
-      { data: { ...data, password: hashedPassword } },
-      info
+    const user = await prisma.mutation.createUser({
+      data: { ...data, password: hashedPassword }
+    });
+
+    const token = jwt.sign(
+      { userId: user.id },
+      'h2v3owtpdgCZSQ7HWkCWbGF89VukYdPP',
+      { expiresIn: 2400 }
     );
+
+    return { user, token };
   },
   updateUser(parent, { id, data }, { prisma }, info) {
     return prisma.mutation.updateUser({ where: { id }, data }, info);
