@@ -1,6 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import getUserId from '../utils/getUserId';
+
 // It's largely unnecessary to make your own checks for things such as whether or not a resource actually exists because Prisma can do it for you.
 // You should do it though if you want more control over what your error messages say!
 
@@ -45,9 +47,11 @@ const Mutation = {
   deleteUser(parent, { id }, { prisma }, info) {
     return prisma.mutation.deleteUser({ where: { id } }, info);
   },
-  createPost(parent, { data }, { prisma }, info) {
+  createPost(parent, { data }, { req, prisma }, info) {
+    const userId = getUserId(req);
+
     return prisma.mutation.createPost(
-      { data: { ...data, author: { connect: { id: data.author } } } },
+      { data: { ...data, author: { connect: { id: userId } } } },
       info
     );
   },
