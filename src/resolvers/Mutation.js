@@ -41,10 +41,14 @@ const Mutation = {
 
     return { token, user };
   },
-  updateUser(parent, { id, data }, { prisma }, info) {
+  updateUser(parent, { data }, { req, prisma }, info) {
+    const id = getUserId(req);
+
     return prisma.mutation.updateUser({ where: { id }, data }, info);
   },
-  deleteUser(parent, { id }, { prisma }, info) {
+  deleteUser(parent, args, { req, prisma }, info) {
+    const id = getUserId(req);
+
     return prisma.mutation.deleteUser({ where: { id } }, info);
   },
   createPost(parent, { data }, { req, prisma }, info) {
