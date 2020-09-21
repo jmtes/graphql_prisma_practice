@@ -24,6 +24,21 @@ const Mutation = {
 
     return { user, token };
   },
+  async loginUser(parent, { data }, { prisma }, info) {
+    const user = await prisma.query.user({ where: { email: data.email } });
+    if (!user) throw Error('Account does not exist.');
+
+    const isMatch = await bcrypt.compare(data.password, user.password);
+    if (!isMatch) throw Error('Incorrect password.');
+
+    const token = jwt.sign(
+      { userId: user.id },
+      'h2v3owtpdgCZSQ7HWkCWbGF89VukYdPP',
+      { expiresIn: 2400 }
+    );
+
+    return { token, user };
+  },
   updateUser(parent, { id, data }, { prisma }, info) {
     return prisma.mutation.updateUser({ where: { id }, data }, info);
   },
