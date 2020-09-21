@@ -5,7 +5,8 @@
       "extensions": {
         "endpoints": {
           "default": "http://localhost:4466"
-        }
+        },
+        "prisma": "prisma/prisma.yml"
       }
     }
   }
