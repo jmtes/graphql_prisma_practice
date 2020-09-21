@@ -89,10 +89,26 @@ enum MutationType {
 
 type PostSubscriptionPayload {
   mutation: MutationType!
-  data: Post!
+  node: Post
+  updatedFields: [String!]
+  previousValues: PostPreviousValues
 }
 
 type CommentSubscriptionPayload {
   mutation: MutationType!
-  data: Comment!
+  node: Comment
+  updatedFields: [String!]
+  previousValues: CommentPreviousValues
+}
+
+type PostPreviousValues {
+  id: ID!
+  title: String!
+  body: String!
+  published: Boolean!
+}
+
+type CommentPreviousValues {
+  id: ID!
+  text: String!
 }
