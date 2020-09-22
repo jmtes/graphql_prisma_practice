@@ -10,6 +10,9 @@ const User = {
       else return null;
     }
   },
+  password() {
+    return null;
+  },
   posts: {
     fragment: 'fragment userId on User { id }',
     resolve(parent, args, { req, prisma }, info) {
