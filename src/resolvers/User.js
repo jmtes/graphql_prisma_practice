@@ -9,6 +9,18 @@ const User = {
       if (userId && userId === parent.id) return parent.email;
       else return null;
     }
+  },
+  posts: {
+    fragment: 'fragment userId on User { id }',
+    resolve(parent, args, { req, prisma }, info) {
+      const userId = getUserId(req, false);
+
+      return userId === parent.id
+        ? parent.posts
+        : prisma.query.posts({
+            where: { author: { id: parent.id }, published: true }
+          });
+    }
   }
 };
 
