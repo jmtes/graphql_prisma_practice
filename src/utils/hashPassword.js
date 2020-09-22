@@ -4,7 +4,7 @@ const hashPassword = async (password) => {
   if (password.length < 8)
     throw Error('Password must contain at least 8 characters.');
 
-  const salt = await bcrypt.getSalt();
+  const salt = await bcrypt.genSalt();
   return bcrypt.hash(password, salt);
 };
 
