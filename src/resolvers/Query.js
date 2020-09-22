@@ -24,13 +24,10 @@ const Query = {
   comments(parent, args, { prisma }, info) {
     return prisma.query.comments(null, info);
   },
-  me() {
-    return {
-      id: '062e98c1-ea91-4369-b52a-634b80126027',
-      name: 'Juno',
-      email: 'juno@domain.tld',
-      age: 20
-    };
+  me(parent, args, { req, prisma }, info) {
+    const userId = getUserId(req);
+
+    return prisma.query.user({ where: { id: userId } }, info);
   },
   async post(parent, { id }, { req, prisma }, info) {
     const userId = getUserId(req, false);
