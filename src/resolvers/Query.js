@@ -12,22 +12,22 @@ const Query = {
     return prisma.query.users(opArgs, info);
   },
   posts(parent, args, { prisma }, info) {
-    const opArgs = {};
+    const opArgs = {
+      where: {
+        published: true
+      }
+    };
 
     if (args.query)
-      opArgs.where = {
-        OR: [{ title_contains: args.query }, { body_contains: args.query }]
-      };
+      opArgs.where.OR = [
+        { title_contains: args.query },
+        { body_contains: args.query }
+      ];
 
     return prisma.query.posts(opArgs, info);
   },
   comments(parent, args, { prisma }, info) {
     return prisma.query.comments(null, info);
-  },
-  me(parent, args, { req, prisma }, info) {
-    const userId = getUserId(req);
-
-    return prisma.query.user({ where: { id: userId } }, info);
   },
   async post(parent, { id }, { req, prisma }, info) {
     const userId = getUserId(req, false);
@@ -44,6 +44,21 @@ const Query = {
     if (!post) throw Error('Unable to find post.');
 
     return post;
+  },
+  me(parent, args, { req, prisma }, info) {
+    const userId = getUserId(req);
+
+    return prisma.query.user({ where: { id: userId } }, info);
+  },
+  myPosts(parent, { query }, { req, prisma }, info) {
+    const userId = getUserId(req);
+
+    const opArgs = { where: { author: { id: userId } } };
+
+    if (query)
+      opArgs.where.OR = [{ title_contains: query }, { body_contains: query }];
+
+    return prisma.query.posts(opArgs, info);
   }
 };
 
