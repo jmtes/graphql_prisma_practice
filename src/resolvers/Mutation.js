@@ -75,8 +75,14 @@ const Mutation = {
 
     return prisma.mutation.deletePost({ where: { id } }, info);
   },
-  createComment(parent, { data }, { req, prisma }, info) {
+  async createComment(parent, { data }, { req, prisma }, info) {
     const userId = getUserId(req);
+
+    const isPublished = await prisma.exists.Post({
+      id: data.post,
+      published: true
+    });
+    if (!isPublished) throw Error('Unable to create comment.');
 
     return prisma.mutation.createComment(
       {
