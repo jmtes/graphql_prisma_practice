@@ -30,8 +30,10 @@ const Mutation = {
 
     return { token, user };
   },
-  updateUser(parent, { data }, { req, prisma }, info) {
+  async updateUser(parent, { data }, { req, prisma }, info) {
     const id = getUserId(req);
+
+    if (data.password) data.password = await hashPassword(data.password);
 
     return prisma.mutation.updateUser({ where: { id }, data }, info);
   },
