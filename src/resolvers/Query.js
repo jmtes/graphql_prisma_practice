@@ -1,23 +1,25 @@
 import getUserId from '../utils/getUserId';
 
 const Query = {
-  users(parent, { query, first, skip }, { prisma }, info) {
+  users(parent, { query, first, skip, after }, { prisma }, info) {
     const opArgs = {
       first,
-      skip
+      skip,
+      after
     };
 
     if (query) opArgs.where = { name_contains: query };
 
     return prisma.query.users(opArgs, info);
   },
-  posts(parent, { query, first, skip }, { prisma }, info) {
+  posts(parent, { query, first, skip, after }, { prisma }, info) {
     const opArgs = {
       where: {
         published: true
       },
       first,
-      skip
+      skip,
+      after
     };
 
     if (query)
