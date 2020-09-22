@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 
 import getUserId from '../utils/getUserId';
+import generateToken from '../utils/generateToken';
 
 // It's largely unnecessary to make your own checks for things such as whether or not a resource actually exists because Prisma can do it for you.
 // You should do it though if you want more control over what your error messages say!
@@ -18,11 +18,7 @@ const Mutation = {
       data: { ...data, password: hashedPassword }
     });
 
-    const token = jwt.sign(
-      { userId: user.id },
-      'h2v3owtpdgCZSQ7HWkCWbGF89VukYdPP',
-      { expiresIn: 2400 }
-    );
+    const token = generateToken(user.id);
 
     return { user, token };
   },
@@ -33,11 +29,7 @@ const Mutation = {
     const isMatch = await bcrypt.compare(data.password, user.password);
     if (!isMatch) throw Error('Incorrect password.');
 
-    const token = jwt.sign(
-      { userId: user.id },
-      'h2v3owtpdgCZSQ7HWkCWbGF89VukYdPP',
-      { expiresIn: 2400 }
-    );
+    const token = generateToken(user.id);
 
     return { token, user };
   },
