@@ -1,3 +1,5 @@
+import getUserId from '../utils/getUserId';
+
 const Query = {
   users(parent, args, { prisma }, info) {
     const opArgs = {};
@@ -30,14 +32,21 @@ const Query = {
       age: 20
     };
   },
-  post() {
-    return {
-      id: 'aa801b98-63c8-4907-9f6e-09e57388354a',
-      title: 'i got a crush on u...',
-      body:
-        'theres a party down the street at my girls house u should come thru yeah i wanna see u',
-      published: true
-    };
+  async post(parent, { id }, { req, prisma }, info) {
+    const userId = getUserId(req, false);
+
+    const [post] = await prisma.query.posts(
+      {
+        where: {
+          id,
+          OR: [{ published: true }, { author: { id: userId } }]
+        }
+      },
+      info
+    );
+    if (!post) throw Error('Unable to find post.');
+
+    return post;
   }
 };
 
