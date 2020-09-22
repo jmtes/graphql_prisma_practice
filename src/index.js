@@ -1,6 +1,6 @@
 import { GraphQLServer, PubSub } from 'graphql-yoga';
 
-import resolvers from './resolvers';
+import { resolvers, fragmentReplacements } from './resolvers';
 import prisma from './prisma';
 
 // Instantiate PubSub instance
@@ -10,7 +10,8 @@ const pubsub = new PubSub();
 const server = new GraphQLServer({
   typeDefs: './src/schema.graphql',
   resolvers,
-  context: (req) => ({ req, prisma })
+  context: (req) => ({ req, prisma }),
+  fragmentReplacements
 });
 
 // Start server
