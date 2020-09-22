@@ -65,6 +65,10 @@ const Mutation = {
     const postExists = await prisma.exists.Post({ id, author: { id: userId } });
     if (!postExists) throw Error('Unable to edit post.');
 
+    const postIsPublished = await prisma.exists.Post({ id, published: true });
+    if (postIsPublished && data.published === false)
+      await prisma.mutation.deleteManyComments({ where: { post: { id } } });
+
     return prisma.mutation.updatePost({ where: { id }, data }, info);
   },
   async deletePost(parent, { id }, { req, prisma }, info) {
