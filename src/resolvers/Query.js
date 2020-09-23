@@ -1,25 +1,27 @@
 import getUserId from '../utils/getUserId';
 
 const Query = {
-  users(parent, { query, first, skip, after }, { prisma }, info) {
+  users(parent, { query, first, skip, after, orderBy }, { prisma }, info) {
     const opArgs = {
       first,
       skip,
-      after
+      after,
+      orderBy
     };
 
     if (query) opArgs.where = { name_contains: query };
 
     return prisma.query.users(opArgs, info);
   },
-  posts(parent, { query, first, skip, after }, { prisma }, info) {
+  posts(parent, { query, first, skip, after, orderBy }, { prisma }, info) {
     const opArgs = {
       where: {
         published: true
       },
       first,
       skip,
-      after
+      after,
+      orderBy
     };
 
     if (query)
@@ -27,8 +29,8 @@ const Query = {
 
     return prisma.query.posts(opArgs, info);
   },
-  comments(parent, { first, skip, after }, { prisma }, info) {
-    return prisma.query.comments({ first, skip, after }, info);
+  comments(parent, { first, skip, after, orderBy }, { prisma }, info) {
+    return prisma.query.comments({ first, skip, after, orderBy }, info);
   },
   async post(parent, { id }, { req, prisma }, info) {
     const userId = getUserId(req, false);
@@ -51,10 +53,21 @@ const Query = {
 
     return prisma.query.user({ where: { id: userId } }, info);
   },
-  myPosts(parent, { query, first, skip, after }, { req, prisma }, info) {
+  myPosts(
+    parent,
+    { query, first, skip, after, orderBy },
+    { req, prisma },
+    info
+  ) {
     const userId = getUserId(req);
 
-    const opArgs = { where: { author: { id: userId } }, first, skip, after };
+    const opArgs = {
+      where: { author: { id: userId } },
+      first,
+      skip,
+      after,
+      orderBy
+    };
 
     if (query)
       opArgs.where.OR = [{ title_contains: query }, { body_contains: query }];
