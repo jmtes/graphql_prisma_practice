@@ -1,3 +1,3 @@
 endpoint: ${env:PRISMA_ENDPOINT}
 datamodel: datamodel.graphql
-secret: wAQfFMm8RGVpXh9HCjnVX15dpBF9iJCe
+secret: ${env:PRISMA_SECRET}
