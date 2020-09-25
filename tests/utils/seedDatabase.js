@@ -1,6 +1,17 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 import prisma from '../../src/prisma';
+
+export const userOne = {
+  input: {
+    name: 'Emma Thomas',
+    email: 'emma@domain.tld',
+    password: bcrypt.hashSync('QhzuCsao')
+  },
+  user: null,
+  jwt: null
+};
 
 const seedDatabase = async () => {
   // Wipe database
@@ -8,13 +19,10 @@ const seedDatabase = async () => {
   await prisma.mutation.deleteManyUsers();
 
   // Create dummy user
-  const user = await prisma.mutation.createUser({
-    data: {
-      name: 'Emma Thomas',
-      email: 'emma@domain.tld',
-      password: bcrypt.hashSync('QhzuCsao')
-    }
+  userOne.user = await prisma.mutation.createUser({
+    data: userOne.input
   });
+  userOne.jwt = jwt.sign({ userId: userOne.user.id }, process.env.JWT_SECRET);
 
   // Create dummy posts
   await prisma.mutation.createPost({
@@ -22,7 +30,7 @@ const seedDatabase = async () => {
       title: 'A Published Post',
       body: 'We are live!',
       published: true,
-      author: { connect: { id: user.id } }
+      author: { connect: { id: userOne.user.id } }
     }
   });
   await prisma.mutation.createPost({
@@ -30,7 +38,7 @@ const seedDatabase = async () => {
       title: 'A Draft Post',
       body: 'Not finished yet!',
       published: false,
-      author: { connect: { id: user.id } }
+      author: { connect: { id: userOne.user.id } }
     }
   });
 };
