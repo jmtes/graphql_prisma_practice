@@ -72,8 +72,19 @@ describe('Post', () => {
 
     const { data } = await client.mutate({ mutation: updatePost });
 
+    // Check returned data
     expect(data.updatePost.title).toBe('Updated title');
     expect(data.updatePost.body).toBe('Updated body');
     expect(data.updatePost.published).toBe(false);
+
+    // Check DB
+    const postExists = await prisma.exists.Post({
+      id: postOne.post.id,
+      title: 'Updated title',
+      body: 'Updated body',
+      published: false
+    });
+
+    expect(postExists).toBe(true);
   });
 });
