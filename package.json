@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start-server": "babel-node src/index.js",
-    "dev-server": "env-cmd -f ./config/dev.env nodemon src/index.js --ignore ./client/ --ext js,graphql --exec babel-node",
+    "dev-server": "env-cmd -f ./config/dev.env nodemon --watch src src/index.js --ext js,graphql --exec babel-node",
     "dev-client": "parcel client/src/index.html",
+    "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
     "get-schema": "graphql get-schema -p prisma --dotenv config/dev.env",
     "test": "jest --watch"
   },
@@ -27,6 +28,7 @@
     "babel-eslint": "^10.1.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
+    "concurrently": "^5.3.0",
     "env-cmd": "^10.1.0",
     "eslint": "^7.9.0",
     "eslint-config-airbnb": "^18.2.0",
