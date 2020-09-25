@@ -1,44 +1,15 @@
 import 'cross-fetch/polyfill';
-import ApolloBoost, { gql } from 'apollo-boost';
-import bcrypt from 'bcryptjs';
+import { gql } from 'apollo-boost';
 
 import prisma from '../src/prisma';
 
-const client = new ApolloBoost({ uri: 'http://localhost:4000' });
+import getClient from './utils/getClient';
+import seedDatabase from './utils/seedDatabase';
+
+const client = getClient();
 
 describe('User', () => {
-  beforeEach(async () => {
-    // Wipe database
-    await prisma.mutation.deleteManyPosts();
-    await prisma.mutation.deleteManyUsers();
-
-    // Create dummy user
-    const user = await prisma.mutation.createUser({
-      data: {
-        name: 'Emma Thomas',
-        email: 'emma@domain.tld',
-        password: bcrypt.hashSync('QhzuCsao')
-      }
-    });
-
-    // Create dummy posts
-    await prisma.mutation.createPost({
-      data: {
-        title: 'A Published Post',
-        body: 'We are live!',
-        published: true,
-        author: { connect: { id: user.id } }
-      }
-    });
-    await prisma.mutation.createPost({
-      data: {
-        title: 'A Draft Post',
-        body: 'Not finished yet!',
-        published: false,
-        author: { connect: { id: user.id } }
-      }
-    });
-  });
+  beforeEach(seedDatabase);
 
   test('New user should be created in DB upon registration', async () => {
     const createUser = gql`
@@ -154,60 +125,5 @@ describe('User', () => {
     await expect(client.mutate({ mutation: invalidLogin })).rejects.toThrow(
       'Incorrect password.'
     );
-  });
-});
-
-describe('Post', () => {
-  beforeEach(async () => {
-    // Wipe database
-    await prisma.mutation.deleteManyPosts();
-    await prisma.mutation.deleteManyUsers();
-
-    // Create dummy user
-    const user = await prisma.mutation.createUser({
-      data: {
-        name: 'Emma Thomas',
-        email: 'emma@domain.tld',
-        password: bcrypt.hashSync('QhzuCsao')
-      }
-    });
-
-    // Create dummy posts
-    await prisma.mutation.createPost({
-      data: {
-        title: 'A Published Post',
-        body: 'We are live!',
-        published: true,
-        author: { connect: { id: user.id } }
-      }
-    });
-    await prisma.mutation.createPost({
-      data: {
-        title: 'A Draft Post',
-        body: 'Not finished yet!',
-        published: false,
-        author: { connect: { id: user.id } }
-      }
-    });
-  });
-
-  test('Posts query should only return published posts', async () => {
-    const getPosts = gql`
-      query {
-        posts {
-          id
-          title
-          body
-          published
-        }
-      }
-    `;
-
-    const { data } = await client.query({ query: getPosts });
-
-    expect(data.posts.length).toBe(1);
-    expect(data.posts[0].published).toBe(true);
-    expect(data.posts[0].title).toBe('A Published Post');
-    expect(data.posts[0].body).toBe('We are live!');
   });
 });

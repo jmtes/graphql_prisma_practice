@@ -9,7 +9,7 @@
     "dev-client": "parcel client/src/index.html",
     "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
     "get-schema": "graphql get-schema -p prisma --dotenv config/dev.env",
-    "test": "env-cmd -f ./config/test.env jest --watch"
+    "test": "env-cmd -f ./config/test.env jest --watch --runInBand"
   },
   "author": "",
   "license": "ISC",
