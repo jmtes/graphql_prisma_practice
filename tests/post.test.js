@@ -4,7 +4,7 @@ import { gql } from 'apollo-boost';
 import prisma from '../src/prisma';
 
 import getClient from './utils/getClient';
-import seedDatabase, { userOne } from './utils/seedDatabase';
+import seedDatabase, { userOne, postOne } from './utils/seedDatabase';
 
 const defaultClient = getClient();
 
@@ -48,5 +48,32 @@ describe('Post', () => {
     const { data } = await client.query({ query: getMyPosts });
 
     expect(data.myPosts.length).toBe(2);
+  });
+
+  test('updatePost should update post in DB', async () => {
+    const client = getClient(userOne.jwt);
+
+    const updatePost = gql`
+      mutation {
+        updatePost(
+          id: "${postOne.post.id}"
+          data: {
+            title: "Updated title",
+            body: "Updated body",
+            published: false
+          }
+        ) {
+          title
+          body
+          published
+        }
+      }
+    `;
+
+    const { data } = await client.mutate({ mutation: updatePost });
+
+    expect(data.updatePost.title).toBe('Updated title');
+    expect(data.updatePost.body).toBe('Updated body');
+    expect(data.updatePost.published).toBe(false);
   });
 });
