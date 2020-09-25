@@ -4,9 +4,9 @@ import { gql } from 'apollo-boost';
 import prisma from '../src/prisma';
 
 import getClient from './utils/getClient';
-import seedDatabase from './utils/seedDatabase';
+import seedDatabase, { userOne } from './utils/seedDatabase';
 
-const client = getClient();
+const defaultClient = getClient();
 
 describe('User', () => {
   beforeEach(seedDatabase);
@@ -31,7 +31,7 @@ describe('User', () => {
       }
     `;
 
-    const { data } = await client.mutate({ mutation: createUser });
+    const { data } = await defaultClient.mutate({ mutation: createUser });
 
     const userExists = await prisma.exists.User({
       email: 'kate@domain.tld',
@@ -56,7 +56,7 @@ describe('User', () => {
       }
     `;
 
-    await expect(client.mutate({ mutation: badReg })).rejects.toThrow(
+    await expect(defaultClient.mutate({ mutation: badReg })).rejects.toThrow(
       'Password must contain at least 8 characters.'
     );
   });
@@ -72,7 +72,7 @@ describe('User', () => {
       }
     `;
 
-    const { data } = await client.query({ query: getUsers });
+    const { data } = await defaultClient.query({ query: getUsers });
 
     expect(data.users.length).toBe(1);
     expect(data.users[0].email).toBe(null);
@@ -91,7 +91,7 @@ describe('User', () => {
       }
     `;
 
-    const { data } = await client.mutate({ mutation: login });
+    const { data } = await defaultClient.mutate({ mutation: login });
 
     expect(data.loginUser.token).toBeTruthy();
     expect(data.loginUser.user.name).toBe('Emma Thomas');
@@ -108,9 +108,9 @@ describe('User', () => {
       }
     `;
 
-    await expect(client.mutate({ mutation: invalidLogin })).rejects.toThrow(
-      'Account does not exist.'
-    );
+    await expect(
+      defaultClient.mutate({ mutation: invalidLogin })
+    ).rejects.toThrow('Account does not exist.');
   });
 
   test('Login should fail with incorrect password', async () => {
@@ -122,8 +122,24 @@ describe('User', () => {
       }
     `;
 
-    await expect(client.mutate({ mutation: invalidLogin })).rejects.toThrow(
-      'Incorrect password.'
-    );
+    await expect(
+      defaultClient.mutate({ mutation: invalidLogin })
+    ).rejects.toThrow('Incorrect password.');
+  });
+
+  test('Querying me returns correct info for logged-in user', async () => {
+    const client = getClient(userOne.jwt);
+
+    const getMe = gql`
+      query {
+        me {
+          email
+        }
+      }
+    `;
+
+    const { data } = await client.query({ query: getMe });
+
+    expect(data.me.email).toBe(userOne.user.email);
   });
 });
