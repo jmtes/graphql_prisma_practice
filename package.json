@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start-server": "babel-node src/index.js",
-    "dev-server": "env-cmd -f ./config/dev.env nodemon src/index.js --ext js,graphql --exec babel-node",
+    "dev-server": "env-cmd -f ./config/dev.env nodemon src/index.js --ignore ./client/ --ext js,graphql --exec babel-node",
     "dev-client": "parcel client/src/index.html",
     "get-schema": "graphql get-schema -p prisma --dotenv config/dev.env",
     "test": "jest --watch"
