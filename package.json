@@ -52,6 +52,7 @@
   "jest": {
     "globalSetup": "./tests/config/globalSetup.js",
     "globalTeardown": "./tests/config/globalTeardown.js",
-    "testURL": "http://localhost/"
+    "testURL": "http://localhost/",
+    "testEnvironment": "node"
   }
 }
