@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node src/index.js",
-    "dev": "env-cmd -f ./config/dev.env nodemon src/index.js --ext js,graphql --exec babel-node",
+    "start-server": "babel-node src/index.js",
+    "dev-server": "env-cmd -f ./config/dev.env nodemon src/index.js --ext js,graphql --exec babel-node",
+    "dev-client": "parcel client/src/index.html",
     "get-schema": "graphql get-schema -p prisma --dotenv config/dev.env",
     "test": "jest --watch"
   },
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
     "babel-eslint": "^10.1.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.7.0",
@@ -38,6 +40,7 @@
     "graphql-cli": "^2.16.4",
     "jest": "^26.4.2",
     "nodemon": "^2.0.4",
+    "parcel-bundler": "^1.12.4",
     "prettier": "^2.1.2"
   }
 }
