@@ -1,18 +1,6 @@
-import { GraphQLServer, PubSub } from 'graphql-yoga';
+import '@babel/polyfill/noConflict';
 
-import { resolvers, fragmentReplacements } from './resolvers';
-import prisma from './prisma';
-
-// Instantiate PubSub instance
-const pubsub = new PubSub();
-
-// Initialize server
-const server = new GraphQLServer({
-  typeDefs: './src/schema.graphql',
-  resolvers,
-  context: (req) => ({ req, prisma }),
-  fragmentReplacements
-});
+import server from './server';
 
 // Start server
 server.start(() => {
