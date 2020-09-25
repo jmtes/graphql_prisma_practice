@@ -1,3 +1,13 @@
 body {
   font-family: 'Work Sans', sans-serif;
 }
+
+main {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+}
+
+ul#user-list {
+  list-style-type: none;
+  padding-left: 1rem;
+}
