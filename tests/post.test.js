@@ -4,7 +4,7 @@ import { gql } from 'apollo-boost';
 import prisma from '../src/prisma';
 
 import getClient from './utils/getClient';
-import seedDatabase, { userOne, postOne } from './utils/seedDatabase';
+import seedDatabase, { userOne, postOne, postTwo } from './utils/seedDatabase';
 
 const defaultClient = getClient();
 
@@ -50,7 +50,7 @@ describe('Post', () => {
     expect(data.myPosts.length).toBe(2);
   });
 
-  test('updatePost should update post in DB', async () => {
+  test('updatePost mutation should update post in DB', async () => {
     const client = getClient(userOne.jwt);
 
     const updatePost = gql`
@@ -86,5 +86,51 @@ describe('Post', () => {
     });
 
     expect(postExists).toBe(true);
+  });
+
+  test('createPost mutation should create a new post in the DB', async () => {
+    const client = getClient(userOne.jwt);
+
+    const createPost = gql`
+      mutation {
+        createPost(
+          data: { title: "A new post", body: "Testing!", published: true }
+        ) {
+          id
+        }
+      }
+    `;
+
+    const { data } = await client.mutate({ mutation: createPost });
+
+    const newPostExists = await prisma.exists.Post({
+      id: data.createPost.id,
+      title: 'A new post',
+      body: 'Testing!',
+      published: true,
+      author: { id: userOne.user.id }
+    });
+
+    expect(newPostExists).toBe(true);
+  });
+
+  test('deletePost mutation should delete post from DB', async () => {
+    const client = getClient(userOne.jwt);
+
+    const deletePost = gql`
+      mutation {
+        deletePost(
+          id: "${postTwo.post.id}"
+        ) {
+          id
+        }
+      }
+    `;
+
+    const { data } = await client.mutate({ mutation: deletePost });
+
+    const postExists = await prisma.exists.Post({ id: data.deletePost.id });
+
+    expect(postExists).toBe(false);
   });
 });
