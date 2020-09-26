@@ -41,7 +41,7 @@ const seedDatabase = async () => {
       author: { connect: { id: userOne.user.id } }
     }
   });
-  await prisma.mutation.createPost({
+  postTwo.post = await prisma.mutation.createPost({
     data: {
       ...postTwo.input,
       author: { connect: { id: userOne.user.id } }
