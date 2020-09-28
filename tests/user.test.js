@@ -32,7 +32,7 @@ describe('User', () => {
     });
 
     expect(userExists).toBe(true);
-  });
+  }, 10000);
 
   test('User registration should fail if password is too short', async () => {
     const variables = {
@@ -46,19 +46,19 @@ describe('User', () => {
     await expect(
       defaultClient.mutate({ mutation: createUser, variables })
     ).rejects.toThrow('Password must contain at least 8 characters.');
-  });
+  }, 10000);
 
   test('User emails should be hidden in public profiles', async () => {
     const { data } = await defaultClient.query({ query: getUsers });
 
-    expect(data.users.length).toBe(1);
+    expect(data.users.length).toBe(2);
     expect(data.users[0].email).toBe(null);
     expect(data.users[0].name).toBe('Emma Thomas');
-  });
+  }, 10000);
 
   test('Login should succeed with valid credentials', async () => {
     const variables = {
-      data: { email: 'emma@domain.tld', password: 'QhzuCsao' }
+      data: { email: 'emma@domain.tld', password: 'LFdx1ZZnXju6' }
     };
     const { data } = await defaultClient.mutate({
       mutation: loginUser,
@@ -67,7 +67,7 @@ describe('User', () => {
 
     expect(data.loginUser.token).toBeTruthy();
     expect(data.loginUser.user.name).toBe('Emma Thomas');
-  });
+  }, 10000);
 
   test('Login should fail with nonexistent email', async () => {
     const variables = {
@@ -77,7 +77,7 @@ describe('User', () => {
     await expect(
       defaultClient.mutate({ mutation: loginUser, variables })
     ).rejects.toThrow('Account does not exist.');
-  });
+  }, 10000);
 
   test('Login should fail with incorrect password', async () => {
     const variables = {
@@ -87,7 +87,7 @@ describe('User', () => {
     await expect(
       defaultClient.mutate({ mutation: loginUser, variables })
     ).rejects.toThrow('Incorrect password.');
-  });
+  }, 10000);
 
   test('Querying me returns correct info for logged-in user', async () => {
     const client = getClient(userOne.jwt);
@@ -95,5 +95,5 @@ describe('User', () => {
     const { data } = await client.query({ query: getMe });
 
     expect(data.me.email).toBe(userOne.user.email);
-  });
+  }, 10000);
 });
