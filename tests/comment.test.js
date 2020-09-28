@@ -5,13 +5,16 @@ import prisma from '../src/prisma';
 import getClient from './utils/getClient';
 import seedDatabase, {
   userOne,
+  postOne,
   commentOne,
   commentTwo
 } from './utils/seedDatabase';
 
-import { deleteComment } from './operations/comment';
+import { deleteComment, subscribeToComments } from './operations/comment';
 
 describe('Comment', () => {
+  const defaultClient = getClient();
+
   beforeEach(seedDatabase);
 
   test('Should be able to delete own comment', async () => {
@@ -48,5 +51,23 @@ describe('Comment', () => {
     });
 
     expect(commentStillExists).toBe(true);
+  });
+
+  test('Should subscribe to comments for a post', async (done) => {
+    const variables = { postId: postOne.post.id };
+
+    defaultClient
+      .subscribe({ query: subscribeToComments, variables })
+      .subscribe({
+        next({ data }) {
+          expect(data.comment.mutation).toBe('DELETED');
+          done();
+        }
+      });
+
+    // Mutate comment
+    await prisma.mutation.deleteComment({
+      where: { id: commentOne.comment.id }
+    });
   });
 });
