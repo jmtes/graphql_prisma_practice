@@ -6,6 +6,7 @@ import { onError } from 'apollo-link-error';
 import { ApolloLink, Observable } from 'apollo-link';
 import { WebSocketLink } from 'apollo-link-ws';
 import { getMainDefinition } from 'apollo-utilities';
+import WebSocket from 'ws';
 
 const getClient = (
   jwt,
@@ -75,7 +76,8 @@ const getClient = (
             };
           }
         }
-      }
+      },
+      webSocketImpl: WebSocket
     })
   ]);
 
