@@ -47,3 +47,17 @@ export const deletePost = gql`
     }
   }
 `;
+
+export const subscribeToPosts = gql`
+  subscription {
+    post {
+      mutation
+      node {
+        title
+        author {
+          name
+        }
+      }
+    }
+  }
+`;

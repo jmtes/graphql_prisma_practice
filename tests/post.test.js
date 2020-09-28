@@ -10,7 +10,8 @@ import {
   getMyPosts,
   createPost,
   updatePost,
-  deletePost
+  deletePost,
+  subscribeToPosts
 } from './operations/post';
 
 const defaultClient = getClient();
@@ -95,5 +96,23 @@ describe('Post', () => {
     const postExists = await prisma.exists.Post({ id: data.deletePost.id });
 
     expect(postExists).toBe(false);
+  });
+
+  test('Should subscribe to posts', async (done) => {
+    defaultClient.subscribe({ query: subscribeToPosts }).subscribe({
+      next({ data }) {
+        expect(data.post.mutation).toBe('CREATED');
+        done();
+      }
+    });
+
+    await prisma.mutation.createPost({
+      data: {
+        title: 'Test Post 3',
+        body: '',
+        published: true,
+        author: { connect: { id: userOne.user.id } }
+      }
+    });
   });
 });
