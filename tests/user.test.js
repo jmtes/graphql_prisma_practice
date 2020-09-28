@@ -6,32 +6,48 @@ import prisma from '../src/prisma';
 import getClient from './utils/getClient';
 import seedDatabase, { userOne } from './utils/seedDatabase';
 
-const defaultClient = getClient();
-
 describe('User', () => {
+  const defaultClient = getClient();
+
+  const createUser = gql`
+    mutation($data: CreateUserInput!) {
+      createUser(data: $data) {
+        token
+        user {
+          name
+          email
+          password
+        }
+      }
+    }
+  `;
+
+  const loginUser = gql`
+    mutation($data: LoginUserInput!) {
+      loginUser(data: $data) {
+        token
+        user {
+          name
+        }
+      }
+    }
+  `;
+
   beforeEach(seedDatabase);
 
   test('New user should be created in DB upon registration', async () => {
-    const createUser = gql`
-      mutation {
-        createUser(
-          data: {
-            name: "Kate Page"
-            email: "kate@domain.tld"
-            password: "QhzuCsao"
-          }
-        ) {
-          token
-          user {
-            name
-            email
-            password
-          }
-        }
+    const variables = {
+      data: {
+        name: 'Kate Page',
+        email: 'kate@domain.tld',
+        password: 'QhzuCsao'
       }
-    `;
+    };
 
-    const { data } = await defaultClient.mutate({ mutation: createUser });
+    const { data } = await defaultClient.mutate({
+      mutation: createUser,
+      variables
+    });
 
     const userExists = await prisma.exists.User({
       email: 'kate@domain.tld',
@@ -42,23 +58,17 @@ describe('User', () => {
   });
 
   test('User registration should fail if password is too short', async () => {
-    const badReg = gql`
-      mutation {
-        createUser(
-          data: {
-            name: "Kate Page"
-            email: "kate@domain.tld"
-            password: "2short"
-          }
-        ) {
-          token
-        }
+    const variables = {
+      data: {
+        name: 'Kate Page',
+        email: 'kate@domain.tld',
+        password: '2short'
       }
-    `;
+    };
 
-    await expect(defaultClient.mutate({ mutation: badReg })).rejects.toThrow(
-      'Password must contain at least 8 characters.'
-    );
+    await expect(
+      defaultClient.mutate({ mutation: createUser, variables })
+    ).rejects.toThrow('Password must contain at least 8 characters.');
   });
 
   test('User emails should be hidden in public profiles', async () => {
@@ -80,50 +90,35 @@ describe('User', () => {
   });
 
   test('Login should succeed with valid credentials', async () => {
-    const login = gql`
-      mutation {
-        loginUser(data: { email: "emma@domain.tld", password: "QhzuCsao" }) {
-          token
-          user {
-            name
-          }
-        }
-      }
-    `;
-
-    const { data } = await defaultClient.mutate({ mutation: login });
+    const variables = {
+      data: { email: 'emma@domain.tld', password: 'QhzuCsao' }
+    };
+    const { data } = await defaultClient.mutate({
+      mutation: loginUser,
+      variables
+    });
 
     expect(data.loginUser.token).toBeTruthy();
     expect(data.loginUser.user.name).toBe('Emma Thomas');
   });
 
   test('Login should fail with nonexistent email', async () => {
-    const invalidLogin = gql`
-      mutation {
-        loginUser(
-          data: { email: "doesntexist@domain.tld", password: "akdasjlsafj" }
-        ) {
-          token
-        }
-      }
-    `;
+    const variables = {
+      data: { email: 'doesntexist@domain.tld', password: 'akdasjlsafj' }
+    };
 
     await expect(
-      defaultClient.mutate({ mutation: invalidLogin })
+      defaultClient.mutate({ mutation: loginUser, variables })
     ).rejects.toThrow('Account does not exist.');
   });
 
   test('Login should fail with incorrect password', async () => {
-    const invalidLogin = gql`
-      mutation {
-        loginUser(data: { email: "emma@domain.tld", password: "incorrect" }) {
-          token
-        }
-      }
-    `;
+    const variables = {
+      data: { email: 'emma@domain.tld', password: 'incorrect' }
+    };
 
     await expect(
-      defaultClient.mutate({ mutation: invalidLogin })
+      defaultClient.mutate({ mutation: loginUser, variables })
     ).rejects.toThrow('Incorrect password.');
   });
 
