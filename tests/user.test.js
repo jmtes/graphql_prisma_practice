@@ -1,37 +1,14 @@
 import 'cross-fetch/polyfill';
-import { gql } from 'apollo-boost';
 
 import prisma from '../src/prisma';
 
 import getClient from './utils/getClient';
 import seedDatabase, { userOne } from './utils/seedDatabase';
 
+import { createUser, loginUser, getUsers, getMe } from './operations/user';
+
 describe('User', () => {
   const defaultClient = getClient();
-
-  const createUser = gql`
-    mutation($data: CreateUserInput!) {
-      createUser(data: $data) {
-        token
-        user {
-          name
-          email
-          password
-        }
-      }
-    }
-  `;
-
-  const loginUser = gql`
-    mutation($data: LoginUserInput!) {
-      loginUser(data: $data) {
-        token
-        user {
-          name
-        }
-      }
-    }
-  `;
 
   beforeEach(seedDatabase);
 
@@ -72,16 +49,6 @@ describe('User', () => {
   });
 
   test('User emails should be hidden in public profiles', async () => {
-    const getUsers = gql`
-      query {
-        users {
-          id
-          name
-          email
-        }
-      }
-    `;
-
     const { data } = await defaultClient.query({ query: getUsers });
 
     expect(data.users.length).toBe(1);
@@ -124,14 +91,6 @@ describe('User', () => {
 
   test('Querying me returns correct info for logged-in user', async () => {
     const client = getClient(userOne.jwt);
-
-    const getMe = gql`
-      query {
-        me {
-          email
-        }
-      }
-    `;
 
     const { data } = await client.query({ query: getMe });
 
